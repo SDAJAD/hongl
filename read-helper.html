@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>早读 / 自习助手 Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft Yahei", sans-serif;
+      background: #ffb347;
+      background: linear-gradient(135deg, #ff9966, #ff5e62);
+      color: #333;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: #111827;
+      border-radius: 24px;
+      padding: 24px 20px 28px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+      color: #f9fafb;
+      position: relative;
+    }
+
+    .card-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .badge {
+      position: absolute;
+      top: 12px;
+      right: 20px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .title-main {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .title-sub {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 0;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: #f9fafb;
+      box-shadow: 0 10px 18px rgba(59,130,246,0.4);
+    }
+    .btn-secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+    }
+    .btn:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: none;
+    }
+    .btn-sm {
+      flex: 0 0 auto;
+      padding: 8px 14px;
+      font-size: 13px;
+      border-radius: 999px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 12px;
+      font-size: 14px;
+    }
+    .field-label {
+      color: #d1d5db;
+      white-space: nowrap;
+    }
+    .field-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #f9fafb;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .timer-display {
+      text-align: center;
+      margin: 12px 0 8px;
+    }
+    .timer-label {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+    .timer-value {
+      font-size: 32px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.08em;
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 6px;
+      gap: 8px;
+    }
+    .status-highlight {
+      color: #fbbf24;
+      font-weight: 500;
+    }
+
+    /* 音量可视化区域：树+背景 */
+    .visual-area {
+      margin: 8px 0 12px;
+    }
+    .visual-bg {
+      width: 100%;
+      height: 180px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #e0fdf4, #ccf0e6);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .tree-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      transform-origin: bottom center;
+      transition: transform 0.08s linear;
+    }
+    .tree-crown {
+      width: 90px;
+      height: 90px;
+      border-radius: 999px;
+      background: #10b981;
+      border: 4px solid #059669;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .tree-trunk {
+      width: 26px;
+      height: 60px;
+      background: #a85519;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .volume-wrapper {
+      margin: 6px 0 6px;
+    }
+    .volume-label {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .volume-bar {
+      width: 100%;
+      height: 12px;
+      background: #020617;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #374151;
+    }
+    .volume-level {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22c55e, #fbbf24, #ef4444);
+      transition: width 0.04s linear;
+    }
+
+    .chip {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.7);
+      border: 1px solid #374151;
+      font-size: 11px;
+      color: #9ca3af;
+      gap: 4px;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: blink 1.2s infinite ease-in-out;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 1; }
+    }
+
+    .footer-text {
+      margin-top: 14px;
+      font-size: 11px;
+      color: #6b7280;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        border-radius: 20px;
+        padding: 20px 16px 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">1 / 1</div>
+
+    <!-- 选择模式页面 -->
+    <div id="screen-select">
+      <div class="card-header">
+        <div class="title-main">请选择模式</div>
+        <div class="title-sub">适用于老师早读 / 自习课堂的简易小工具</div>
+        <div class="btn-row">
+          <button id="btn-morning" class="btn btn-primary">早读模式</button>
+          <button id="btn-self" class="btn btn-secondary">自习模式</button>
+        </div>
+      </div>
+      <div class="footer-text">
+        打开浏览器即可使用，无需安装软件。<br/>
+        开始后，系统会获取麦克风权限，只做音量判断，不做录音保存。
+      </div>
+    </div>
+
+    <!-- 运行页面 -->
+    <div id="screen-session" class="hidden">
+      <div class="card-header">
+        <div class="title-main" id="modeTitle">早读模式</div>
+        <div class="title-sub">
+          <span id="modeDesc">适合统一朗读，教师在前方控制节奏。</span>
+        </div>
+      </div>
+
+      <!-- 音量可视化树形图 -->
+      <div class="visual-area">
+        <div class="visual-bg">
+          <div id="treeWrapper" class="tree-wrapper">
+            <div id="treeCrown" class="tree-crown"></div>
+            <div class="tree-trunk"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-label">设置时长</div>
+        <div class="field-input">
+          <input id="durationInput" type="number" min="1" max="180" value="20" />
+          <span style="font-size:13px;color:#9ca3af;">分钟</span>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-label">朗读判断阈值</div>
+        <div class="field-input">
+          <input id="thresholdInput" type="number" min="1" max="100" value="35" />
+          <span style="font-size:13px;color:#9ca3af;">（数值越小越敏感）</span>
+        </div>
+      </div>
+
+      <div class="timer-display">
+        <div class="timer-label">剩余时间</div>
+        <div class="timer-value" id="timerDisplay">20:00</div>
+      </div>
+
+      <div class="status-row">
+        <div>当前状态：<span id="runStatus" class="status-highlight">未开始</span></div>
+        <div>朗读占比：<span id="speakPercent">0%</span></div>
+      </div>
+
+      <div class="volume-wrapper">
+        <div class="volume-label">
+          <span>教室整体音量</span>
+          <span id="dbText" style="font-size:12px;color:#9ca3af;">0 dB</span>
+          <span class="chip">
+            <span class="dot"></span>
+            <span id="chipLabel">等待开始</span>
+          </span>
+        </div>
+        <div class="volume-bar">
+          <div id="volumeLevel" class="volume-level"></div>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button id="btn-start" class="btn btn-primary btn-sm">开始</button>
+        <button id="btn-pause" class="btn btn-secondary btn-sm">暂停</button>
+        <button id="btn-reset" class="btn btn-secondary btn-sm">重置</button>
+        <button id="btn-back" class="btn btn-secondary btn-sm">返回</button>
+      </div>
+
+      <div class="footer-text">
+        小提示：电脑连接蓝牙音箱后，全班朗读效果更明显。<br/>
+        这是一个演示版，你可以在此基础上继续二开接入自己的账号系统。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM 获取
+    const screenSelect = document.getElementById("screen-select");
+    const screenSession = document.getElementById("screen-session");
+    const btnMorning = document.getElementById("btn-morning");
+    const btnSelf = document.getElementById("btn-self");
+    const btnStart = document.getElementById("btn-start");
+    const btnPause = document.getElementById("btn-pause");
+    const btnReset = document.getElementById("btn-reset");
+    const btnBack = document.getElementById("btn-back");
+
+    const modeTitle = document.getElementById("modeTitle");
+    const modeDesc = document.getElementById("modeDesc");
+    const durationInput = document.getElementById("durationInput");
+    const thresholdInput = document.getElementById("thresholdInput");
+    const timerDisplay = document.getElementById("timerDisplay");
+    const runStatus = document.getElementById("runStatus");
+    const speakPercent = document.getElementById("speakPercent");
+    const volumeLevelEl = document.getElementById("volumeLevel");
+    const chipLabel = document.getElementById("chipLabel");
+    const dbText = document.getElementById("dbText");
+    const treeWrapper = document.getElementById("treeWrapper");
+    const treeCrown = document.getElementById("treeCrown");
+
+    // 状态变量
+    let currentMode = "morning";
+    let totalSeconds = 20 * 60;
+    let remainingSeconds = totalSeconds;
+    let timerId = null;
+
+    // 音频分析相关
+    let audioContext = null;
+    let analyser = null;
+    let dataArray = null;
+    let micStream = null;
+    let rafId = null;
+    let speakingNow = false;
+    let speakSeconds = 0;
+
+    function switchToSession(mode) {
+      currentMode = mode;
+
+      if (mode === "morning") {
+        modeTitle.textContent = "早读模式";
+        modeDesc.textContent = "适合统一朗读，教师在前方控制节奏。";
+      } else {
+        modeTitle.textContent = "自习模式";
+        modeDesc.textContent = "适合安静自习，检测教室整体噪音水平。";
+      }
+
+      screenSelect.classList.add("hidden");
+      screenSession.classList.remove("hidden");
+      runStatus.textContent = "未开始";
+      chipLabel.textContent = "等待开始";
+      speakSeconds = 0;
+      speakPercent.textContent = "0%";
+      updateTotalSecondsFromInput();
+      updateTimerDisplay();
+    }
+
+    btnMorning.addEventListener("click", () => switchToSession("morning"));
+    btnSelf.addEventListener("click", () => switchToSession("self"));
+
+    btnBack.addEventListener("click", () => {
+      stopTimer();
+      stopAudio();
+      screenSession.classList.add("hidden");
+      screenSelect.classList.remove("hidden");
+    });
+
+    function updateTotalSecondsFromInput() {
+      const minutes = Math.max(1, Math.min(180, Number(durationInput.value) || 20));
+      totalSeconds = minutes * 60;
+      remainingSeconds = totalSeconds;
+    }
+
+    durationInput.addEventListener("change", () => {
+      if (!timerId) {
+        updateTotalSecondsFromInput();
+        updateTimerDisplay();
+      }
+    });
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      const mm = m < 10 ? "0" + m : "" + m;
+      const ss = s < 10 ? "0" + s : "" + s;
+      return mm + ":" + ss;
+    }
+
+    function updateTimerDisplay() {
+      timerDisplay.textContent = formatTime(remainingSeconds);
+      const percent = totalSeconds > 0 ? Math.round((speakSeconds / totalSeconds) * 100) : 0;
+      speakPercent.textContent = percent + "%";
+    }
+
+    function startTimer() {
+      if (timerId) return;
+      updateTotalSecondsFromInput();
+      if (!audioContext) {
+        initAudio();
+      }
+      runStatus.textContent = "进行中";
+      chipLabel.textContent = "检测中…";
+      timerId = setInterval(() => {
+        if (remainingSeconds <= 0) {
+          stopTimer();
+          runStatus.textContent = "已结束";
+          chipLabel.textContent = "计时完成";
+          return;
+        }
+        remainingSeconds--;
+
+        if (speakingNow) {
+          speakSeconds++;
+        }
+
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+      if (runStatus.textContent !== "已结束") {
+        runStatus.textContent = "已暂停";
+        chipLabel.textContent = "已暂停";
+      }
+    }
+
+    function resetTimer() {
+      stopTimer();
+      speakSeconds = 0;
+      updateTotalSecondsFromInput();
+      updateTimerDisplay();
+      runStatus.textContent = "未开始";
+      chipLabel.textContent = "等待开始";
+    }
+
+    btnStart.addEventListener("click", startTimer);
+    btnPause.addEventListener("click", stopTimer);
+    btnReset.addEventListener("click", resetTimer);
+
+    async function initAudio() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("当前浏览器不支持麦克风访问，建议使用最新版 Chrome / Edge。");
+        return;
+      }
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(micStream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        const bufferLength = analyser.fftSize;
+        dataArray = new Uint8Array(bufferLength);
+        source.connect(analyser);
+        audioLoop();
+      } catch (err) {
+        console.error(err);
+        alert("无法获取麦克风权限，请检查浏览器设置。");
+      }
+    }
+
+    function audioLoop() {
+      if (!analyser) return;
+      analyser.getByteTimeDomainData(dataArray);
+
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        const v = (dataArray[i] - 128) / 128;
+        sum += v * v;
+      }
+      const rms = Math.sqrt(sum / dataArray.length); // 0 ~ 1 左右
+
+      // 粗略 dB 估算，仅用于展示
+      let db = rms <= 0 ? 0 : 20 * Math.log10(rms) + 60; // 平移到 0~60 左右
+      db = Math.max(0, Math.min(90, Math.round(db)));
+      if (dbText) {
+        dbText.textContent = db + " dB";
+      }
+
+      // 阈值映射
+      const uiThreshold = Math.max(1, Math.min(100, Number(thresholdInput.value) || 35));
+      const minT = 0.02;
+      const maxT = 0.4;
+      const t = minT + (maxT - minT) * (uiThreshold / 100);
+
+      // 0-100 的可视化百分比
+      const levelPercent = Math.max(0, Math.min(100, Math.round(rms * 200)));
+      volumeLevelEl.style.width = levelPercent + "%";
+
+      // 树缩放：音量越大，树越大
+      const minScale = 0.8;
+      const maxScale = 1.8;
+      const scale = minScale + (maxScale - minScale) * (levelPercent / 100);
+      if (treeWrapper) {
+        treeWrapper.style.transform = `scale(${scale})`;
+      }
+
+      // 树颜色：小声绿，中声黄，太吵橙红
+      if (treeCrown) {
+        if (levelPercent < 25) {
+          // 安静 / 小声：绿色
+          treeCrown.style.background = "#10b981";
+          treeCrown.style.borderColor = "#059669";
+        } else if (levelPercent < 60) {
+          // 中等音量：黄色
+          treeCrown.style.background = "#facc15";
+          treeCrown.style.borderColor = "#eab308";
+        } else {
+          // 太吵：橙红
+          treeCrown.style.background = "#f97316";
+          treeCrown.style.borderColor = "#ea580c";
+        }
+      }
+
+      // 是否视为“朗读中”
+      speakingNow = rms > t;
+
+      if (timerId) {
+        if (speakingNow) {
+          chipLabel.textContent = currentMode === "morning" ? "朗读中…" : "噪音偏高";
+        } else {
+          chipLabel.textContent = currentMode === "morning" ? "声音偏低" : "较为安静";
+        }
+      }
+
+      rafId = requestAnimationFrame(audioLoop);
+    }
+
+    function stopAudio() {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+      if (micStream) {
+        micStream.getTracks().forEach(t => t.stop());
+        micStream = null;
+      }
+      volumeLevelEl.style.width = "0%";
+      if (treeWrapper) {
+        treeWrapper.style.transform = "scale(1)";
+      }
+      speakingNow = false;
+    }
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>早读 / 自习助手 Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft Yahei", sans-serif;
+      background: #ffb347;
+      background: linear-gradient(135deg, #ff9966, #ff5e62);
+      color: #333;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: #111827;
+      border-radius: 24px;
+      padding: 24px 20px 28px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+      color: #f9fafb;
+      position: relative;
+    }
+
+    .card-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .badge {
+      position: absolute;
+      top: 12px;
+      right: 20px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .title-main {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .title-sub {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 0;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: #f9fafb;
+      box-shadow: 0 10px 18px rgba(59,130,246,0.4);
+    }
+    .btn-secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+    }
+    .btn:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: none;
+    }
+    .btn-sm {
+      flex: 0 0 auto;
+      padding: 8px 14px;
+      font-size: 13px;
+      border-radius: 999px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 12px;
+      font-size: 14px;
+    }
+    .field-label {
+      color: #d1d5db;
+      white-space: nowrap;
+    }
+    .field-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    input[type="number"] {
+      width: 80px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #f9fafb;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .timer-display {
+      text-align: center;
+      margin: 12px 0 8px;
+    }
+    .timer-label {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+    .timer-value {
+      font-size: 32px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.08em;
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 6px;
+      gap: 8px;
+    }
+    .status-highlight {
+      color: #fbbf24;
+      font-weight: 500;
+    }
+
+    /* 音量可视化区域：树+背景 */
+    .visual-area {
+      margin: 8px 0 12px;
+    }
+    .visual-bg {
+      width: 100%;
+      height: 180px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #e0fdf4, #ccf0e6);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .tree-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      transform-origin: bottom center;
+      transition: transform 0.08s linear;
+    }
+    .tree-crown {
+      width: 90px;
+      height: 90px;
+      border-radius: 999px;
+      background: #10b981;
+      border: 4px solid #059669;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .tree-trunk {
+      width: 26px;
+      height: 60px;
+      background: #a85519;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .volume-wrapper {
+      margin: 6px 0 6px;
+    }
+    .volume-label {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .volume-bar {
+      width: 100%;
+      height: 12px;
+      background: #020617;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #374151;
+    }
+    .volume-level {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22c55e, #fbbf24, #ef4444);
+      transition: width 0.04s linear;
+    }
+
+    .chip {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.7);
+      border: 1px solid #374151;
+      font-size: 11px;
+      color: #9ca3af;
+      gap: 4px;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: blink 1.2s infinite ease-in-out;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 1; }
+    }
+
+    .footer-text {
+      margin-top: 14px;
+      font-size: 11px;
+      color: #6b7280;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        border-radius: 20px;
+        padding: 20px 16px 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">1 / 1</div>
+
+    <!-- 选择模式页面 -->
+    <div id="screen-select">
+      <div class="card-header">
+        <div class="title-main">请选择模式</div>
+        <div class="title-sub">适用于老师早读 / 自习课堂的简易小工具</div>
+        <div class="btn-row">
+          <button id="btn-morning" class="btn btn-primary">早读模式</button>
+          <button id="btn-self" class="btn btn-secondary">自习模式</button>
+        </div>
+      </div>
+      <div class="footer-text">
+        打开浏览器即可使用，无需安装软件。<br/>
+        开始后，系统会获取麦克风权限，只做音量判断，不做录音保存。
+      </div>
+    </div>
+
+    <!-- 运行页面 -->
+    <div id="screen-session" class="hidden">
+      <div class="card-header">
+        <div class="title-main" id="modeTitle">早读模式</div>
+        <div class="title-sub">
+          <span id="modeDesc">适合统一朗读，教师在前方控制节奏。</span>
+        </div>
+      </div>
+
+      <!-- 音量可视化树形图 -->
+      <div class="visual-area">
+        <div class="visual-bg">
+          <div id="treeWrapper" class="tree-wrapper">
+            <div id="treeCrown" class="tree-crown"></div>
+            <div class="tree-trunk"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-label">设置时长</div>
+        <div class="field-input">
+          <input id="durationInput" type="number" min="1" max="180" value="20" />
+          <span style="font-size:13px;color:#9ca3af;">分钟</span>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-label">朗读判断阈值</div>
+        <div class="field-input">
+          <input id="thresholdInput" type="number" min="1" max="100" value="35" />
+          <span style="font-size:13px;color:#9ca3af;">（数值越小越敏感）</span>
+        </div>
+      </div>
+
+      <div class="timer-display">
+        <div class="timer-label">剩余时间</div>
+        <div class="timer-value" id="timerDisplay">20:00</div>
+      </div>
+
+      <div class="status-row">
+        <div>当前状态：<span id="runStatus" class="status-highlight">未开始</span></div>
+        <div>朗读占比：<span id="speakPercent">0%</span></div>
+      </div>
+
+      <div class="volume-wrapper">
+        <div class="volume-label">
+          <span>教室整体音量</span>
+          <span id="dbText" style="font-size:12px;color:#9ca3af;">0 dB</span>
+          <span class="chip">
+            <span class="dot"></span>
+            <span id="chipLabel">等待开始</span>
+          </span>
+        </div>
+        <div class="volume-bar">
+          <div id="volumeLevel" class="volume-level"></div>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button id="btn-start" class="btn btn-primary btn-sm">开始</button>
+        <button id="btn-pause" class="btn btn-secondary btn-sm">暂停</button>
+        <button id="btn-reset" class="btn btn-secondary btn-sm">重置</button>
+        <button id="btn-back" class="btn btn-secondary btn-sm">返回</button>
+      </div>
+
+      <div class="footer-text">
+        小提示：电脑连接蓝牙音箱后，全班朗读效果更明显。<br/>
+        这是一个演示版，你可以在此基础上继续二开接入自己的账号系统。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM 获取
+    const screenSelect = document.getElementById("screen-select");
+    const screenSession = document.getElementById("screen-session");
+    const btnMorning = document.getElementById("btn-morning");
+    const btnSelf = document.getElementById("btn-self");
+    const btnStart = document.getElementById("btn-start");
+    const btnPause = document.getElementById("btn-pause");
+    const btnReset = document.getElementById("btn-reset");
+    const btnBack = document.getElementById("btn-back");
+
+    const modeTitle = document.getElementById("modeTitle");
+    const modeDesc = document.getElementById("modeDesc");
+    const durationInput = document.getElementById("durationInput");
+    const thresholdInput = document.getElementById("thresholdInput");
+    const timerDisplay = document.getElementById("timerDisplay");
+    const runStatus = document.getElementById("runStatus");
+    const speakPercent = document.getElementById("speakPercent");
+    const volumeLevelEl = document.getElementById("volumeLevel");
+    const chipLabel = document.getElementById("chipLabel");
+    const dbText = document.getElementById("dbText");
+    const treeWrapper = document.getElementById("treeWrapper");
+    const treeCrown = document.getElementById("treeCrown");
+
+    // 状态变量
+    let currentMode = "morning";
+    let totalSeconds = 20 * 60;
+    let remainingSeconds = totalSeconds;
+    let timerId = null;
+
+    // 音频分析相关
+    let audioContext = null;
+    let analyser = null;
+    let dataArray = null;
+    let micStream = null;
+    let rafId = null;
+    let speakingNow = false;
+    let speakSeconds = 0;
+
+    function switchToSession(mode) {
+      currentMode = mode;
+
+      if (mode === "morning") {
+        modeTitle.textContent = "早读模式";
+        modeDesc.textContent = "适合统一朗读，教师在前方控制节奏。";
+      } else {
+        modeTitle.textContent = "自习模式";
+        modeDesc.textContent = "适合安静自习，检测教室整体噪音水平。";
+      }
+
+      screenSelect.classList.add("hidden");
+      screenSession.classList.remove("hidden");
+      runStatus.textContent = "未开始";
+      chipLabel.textContent = "等待开始";
+      speakSeconds = 0;
+      speakPercent.textContent = "0%";
+      updateTotalSecondsFromInput();
+      updateTimerDisplay();
+    }
+
+    btnMorning.addEventListener("click", () => switchToSession("morning"));
+    btnSelf.addEventListener("click", () => switchToSession("self"));
+
+    btnBack.addEventListener("click", () => {
+      stopTimer();
+      stopAudio();
+      screenSession.classList.add("hidden");
+      screenSelect.classList.remove("hidden");
+    });
+
+    function updateTotalSecondsFromInput() {
+      const minutes = Math.max(1, Math.min(180, Number(durationInput.value) || 20));
+      totalSeconds = minutes * 60;
+      remainingSeconds = totalSeconds;
+    }
+
+    durationInput.addEventListener("change", () => {
+      if (!timerId) {
+        updateTotalSecondsFromInput();
+        updateTimerDisplay();
+      }
+    });
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      const mm = m < 10 ? "0" + m : "" + m;
+      const ss = s < 10 ? "0" + s : "" + s;
+      return mm + ":" + ss;
+    }
+
+    function updateTimerDisplay() {
+      timerDisplay.textContent = formatTime(remainingSeconds);
+      const percent = totalSeconds > 0 ? Math.round((speakSeconds / totalSeconds) * 100) : 0;
+      speakPercent.textContent = percent + "%";
+    }
+
+    function startTimer() {
+      if (timerId) return;
+      updateTotalSecondsFromInput();
+      if (!audioContext) {
+        initAudio();
+      }
+      runStatus.textContent = "进行中";
+      chipLabel.textContent = "检测中…";
+      timerId = setInterval(() => {
+        if (remainingSeconds <= 0) {
+          stopTimer();
+          runStatus.textContent = "已结束";
+          chipLabel.textContent = "计时完成";
+          return;
+        }
+        remainingSeconds--;
+
+        if (speakingNow) {
+          speakSeconds++;
+        }
+
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+      if (runStatus.textContent !== "已结束") {
+        runStatus.textContent = "已暂停";
+        chipLabel.textContent = "已暂停";
+      }
+    }
+
+    function resetTimer() {
+      stopTimer();
+      speakSeconds = 0;
+      updateTotalSecondsFromInput();
+      updateTimerDisplay();
+      runStatus.textContent = "未开始";
+      chipLabel.textContent = "等待开始";
+    }
+
+    btnStart.addEventListener("click", startTimer);
+    btnPause.addEventListener("click", stopTimer);
+    btnReset.addEventListener("click", resetTimer);
+
+    async function initAudio() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("当前浏览器不支持麦克风访问，建议使用最新版 Chrome / Edge。");
+        return;
+      }
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(micStream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        const bufferLength = analyser.fftSize;
+        dataArray = new Uint8Array(bufferLength);
+        source.connect(analyser);
+        audioLoop();
+      } catch (err) {
+        console.error(err);
+        alert("无法获取麦克风权限，请检查浏览器设置。");
+      }
+    }
+
+    function audioLoop() {
+      if (!analyser) return;
+      analyser.getByteTimeDomainData(dataArray);
+
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        const v = (dataArray[i] - 128) / 128;
+        sum += v * v;
+      }
+      const rms = Math.sqrt(sum / dataArray.length); // 0 ~ 1 左右
+
+      // 粗略 dB 估算，仅用于展示
+      let db = rms <= 0 ? 0 : 20 * Math.log10(rms) + 60; // 平移到 0~60 左右
+      db = Math.max(0, Math.min(90, Math.round(db)));
+      if (dbText) {
+        dbText.textContent = db + " dB";
+      }
+
+      // 阈值映射
+      const uiThreshold = Math.max(1, Math.min(100, Number(thresholdInput.value) || 35));
+      const minT = 0.02;
+      const maxT = 0.4;
+      const t = minT + (maxT - minT) * (uiThreshold / 100);
+
+      // 0-100 的可视化百分比
+      const levelPercent = Math.max(0, Math.min(100, Math.round(rms * 200)));
+      volumeLevelEl.style.width = levelPercent + "%";
+
+      // 树缩放：音量越大，树越大
+      const minScale = 0.8;
+      const maxScale = 1.8;
+      const scale = minScale + (maxScale - minScale) * (levelPercent / 100);
+      if (treeWrapper) {
+        treeWrapper.style.transform = `scale(${scale})`;
+      }
+
+      // 树颜色：小声绿，中声黄，太吵橙红
+      if (treeCrown) {
+        if (levelPercent < 25) {
+          // 安静 / 小声：绿色
+          treeCrown.style.background = "#10b981";
+          treeCrown.style.borderColor = "#059669";
+        } else if (levelPercent < 60) {
+          // 中等音量：黄色
+          treeCrown.style.background = "#facc15";
+          treeCrown.style.borderColor = "#eab308";
+        } else {
+          // 太吵：橙红
+          treeCrown.style.background = "#f97316";
+          treeCrown.style.borderColor = "#ea580c";
+        }
+      }
+
+      // 是否视为“朗读中”
+      speakingNow = rms > t;
+
+      if (timerId) {
+        if (speakingNow) {
+          chipLabel.textContent = currentMode === "morning" ? "朗读中…" : "噪音偏高";
+        } else {
+          chipLabel.textContent = currentMode === "morning" ? "声音偏低" : "较为安静";
+        }
+      }
+
+      rafId = requestAnimationFrame(audioLoop);
+    }
+
+    function stopAudio() {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+      if (micStream) {
+        micStream.getTracks().forEach(t => t.stop());
+        micStream = null;
+      }
+      volumeLevelEl.style.width = "0%";
+      if (treeWrapper) {
+        treeWrapper.style.transform = "scale(1)";
+      }
+      speakingNow = false;
+    }
+  </script>
+</body>
+</html>
